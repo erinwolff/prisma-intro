@@ -17,27 +17,47 @@ router.get('/', async (req, res, next) => {
 
 // /api/authors/:id returns a single author with the specified id
 router.get('/:id', async (req, res, next) => {
-  const id = +req.params.id
-  const result = await prisma.author.findUnique({
-    where: {
-      id: id,
-    },
-  });
-  res.send(result)
+  try {
+    const id = +req.params.id
+    const result = await prisma.author.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (!result) {
+      return next({
+        status: 404,
+        message: `Could not find author with id ${id}`
+      });
+    }
+    res.send(result)
+  } catch {
+    next();
+  }
 })
 
 // /api/authors/:id/books get all books written by the specified author
 router.get('/:id/books', async (req, res, next) => {
-  const id = +req.params.id
-  const result = await prisma.author.findUnique({
-    where: {
-      id: id,
-    },
-    include: {
-      books: true,
+  try {
+    const id = +req.params.id
+    const result = await prisma.author.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        books: true,
+      }
+    })
+    if (!result) {
+      return next({
+        status: 404,
+        message: `Could not find author with id ${id}`
+      })
     }
-  })
-  res.send(result)
+    res.send(result)
+  } catch {
+    next();
+  }
 })
 
 // /api/authors creates a new author with the information provided in the request body
